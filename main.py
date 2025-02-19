@@ -13,52 +13,38 @@ SCREEN_HEIGHT = info.current_h
 background = pygame.image.load("Images/2304x1296.png")
 background = pygame.transform.scale(background, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
-# Color
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-GRAY = (150, 150, 150)
-RED = (255, 0, 0)
+# Load "Tower Defense" Title Image
+title_img = pygame.image.load("Images/Tower_Defense.png")  # Update path
+
+# Load Button Images
+play_img = pygame.image.load("Images/Start_BTN.png")
+quit_img = pygame.image.load("Images/Exit_BTN.png")
+
+# Scale Images if necessary
+button_width, button_height = 200, 50
+play_img = pygame.transform.scale(play_img, (button_width, button_height))
+quit_img = pygame.transform.scale(quit_img, (button_width, button_height))
+
+# Define Positions
+title_rect = title_img.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 4))
+play_rect = play_img.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50))
+quit_rect = quit_img.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
 
 # Shrift
 FONT = pygame.font.SysFont("Arial", 32)
-
-
-# --- FUNCTION: MENU BUTTON ---
-def draw_button(surface, text, rect, base_color, hover_color):
-    """
-    text       - text on a button
-    rect       - pygame.Rect object (x, y, width, height)
-    base_color - color, when mouse not on button
-    hover_color- color, when mouse is on button
-    """
-    mouse_pos = pygame.mouse.get_pos()
-    if rect.collidepoint(mouse_pos):
-        color = hover_color
-    else:
-        color = base_color
-
-    # rectangle
-    pygame.draw.rect(surface, color, rect)
-
-    # preparing and showing text
-    text_surf = FONT.render(text, True, WHITE)
-    text_rect = text_surf.get_rect(center=rect.center)
-    surface.blit(text_surf, text_rect)
 
 
 # --- MENU CYCLE ---
 def main_menu():
     clock = pygame.time.Clock()
 
-    # Creating buttons (x, y, w, h)
-    play_button = pygame.Rect(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 - 110, 200, 50)
-    options_button = pygame.Rect(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 - 50, 200, 50)
-    quit_button = pygame.Rect(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 + 10, 200, 50)
-
     running = True
     while running:
         clock.tick(60)
         screen.blit(background, (0, 0))
+
+        # Get the mouse position
+        mouse_pos = pygame.mouse.get_pos()
 
         # Checking events
         for event in pygame.event.get():
@@ -69,27 +55,35 @@ def main_menu():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 # If left mouse button
                 if event.button == 1:
-                    if play_button.collidepoint(event.pos):
+                    if play_rect.collidepoint(event.pos):
                         # Start game
                         print("Starting game!")
                         game_loop()  # Here I can initiate game function
 
-                    if options_button.collidepoint(event.pos):
-                        print("Option menu")
-
-                    if quit_button.collidepoint(event.pos):
+                    if quit_rect.collidepoint(event.pos):
                         pygame.quit()
                         sys.exit()
 
-        # Menu text
-        title_surf = FONT.render("Main Meniu", True, WHITE)
-        title_rect = title_surf.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 4))
-        screen.blit(title_surf, title_rect)
+            # Hover effects for play button
+        if play_rect.collidepoint(pygame.mouse.get_pos()):
+            # Make the button bigger
+            play_img_hover = pygame.transform.scale(play_img, (button_width + 10, button_height + 10))
+            # Adjust position to keep it centered
+            screen.blit(play_img_hover, (play_rect.x - 5, play_rect.y - 5))
+        else:
+            screen.blit(play_img, play_rect)
 
-        # Buttons
-        draw_button(screen, "Start game", play_button, GRAY, RED)
-        draw_button(screen, "Options", options_button, GRAY, RED)
-        draw_button(screen, "Exit", quit_button, GRAY, RED)
+        # Hover effects for quit button
+        if quit_rect.collidepoint(mouse_pos):
+            # Make the button bigger
+            quit_img_hover = pygame.transform.scale(quit_img, (button_width + 10, button_height + 10))
+            # Adjust position to keep it centered
+            screen.blit(quit_img_hover, (quit_rect.x - 5, quit_rect.y - 5))
+        else:
+            screen.blit(quit_img, quit_rect)
+
+        # Draw "Tower Defense" Title
+        screen.blit(title_img, title_rect)
 
         pygame.display.update()
 
@@ -113,11 +107,10 @@ def game_loop():
                     # Back to menu
                     main_menu()
 
-        screen.fill((0, 100, 100))  # static color
         # Here drawing game objects, update game logic and ect.
 
         # Example: simple in game text
-        info_surf = FONT.render("Game Scene. ESC to get back to main menu", True, WHITE)
+        info_surf = FONT.render("Game Scene. ESC to get back to main menu", True, (255, 255, 255))
         info_rect = info_surf.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
         screen.blit(info_surf, info_rect)
 
