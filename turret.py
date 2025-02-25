@@ -9,7 +9,7 @@ DAMAGE = 5
 
 
 class Turret(pygame.sprite.Sprite):
-    def __init__(self, sprite_sheets, tile_x, tile_y):
+    def __init__(self, sprite_sheets, tile_x, tile_y, shot_fx):
         pygame.sprite.Sprite.__init__(self)
         self.upgrade_level = 1
         self.range = TURRET_DATA[self.upgrade_level - 1].get("range")
@@ -24,6 +24,9 @@ class Turret(pygame.sprite.Sprite):
         # Calculate center coordinates
         self.x = (self.tile_x + 0.5) * TILE_SIZE
         self.y = (self.tile_y + 0.5) * TILE_SIZE
+        # Shot sound effect
+        self.shot_fx = shot_fx
+
 
         # Animation variables
         self.sprite_sheets = sprite_sheets
@@ -80,6 +83,8 @@ class Turret(pygame.sprite.Sprite):
                     self.angle = math.degrees(math.atan2(-y_dist, x_dist))
                     # Damage enemy
                     self.target.health -= DAMAGE
+                    # Play sound effect
+                    self.shot_fx.play()
                     break
 
     def play_animation(self):

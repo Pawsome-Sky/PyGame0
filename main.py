@@ -100,7 +100,7 @@ upgrade_image = pygame.image.load("Images/upgrade_turret.png").convert_alpha()
 # Create shop button images
 begin_button = Button(map_width + 20, 60, begin_image, True)
 turret_button = Button(map_width + 20, 120, buy_turret_image, True)
-cancel_button = Button(map_width + 200, 120, cancel_image, True)
+cancel_button = Button(map_width + 20, 180, cancel_image, True)
 upgrade_button = Button(map_width + 20, 180, upgrade_image, True)
 restart_button = Button(310, 300, restart_image, True)
 fast_forward_button = Button(map_width + 200, 240, fast_forward_image, False)
@@ -138,20 +138,25 @@ def create_turret(mouse_pos):
     # calculate the sequential number of the tile
     mouse_tile_num = (mouse_tile_y * COLS) + mouse_tile_x
 
+    # Ensure within valid tile range
     if 0 <= mouse_tile_x < COLS and 0 <= mouse_tile_y < ROWS:
-        tile_value = world_map.tile_map[mouse_tile_y * COLS + mouse_tile_x]
+        tile_value = world_map.tile_map[mouse_tile_num]
         print(f"Clicked Tile Value: {tile_value}")  # Debugging
 
-    # Check if that tile is grass
-    if world_map.tile_map[mouse_tile_num] == 38 and 19:
-        space_is_free = all(
-            (mouse_tile_x, mouse_tile_y) != (turret.tile_x, turret.tile_y)
-            for turret in turret_group
-        )
+        # Check if tile is grass (allowed placement)
+        if tile_value in [38, 19]:  # Fix incorrect logic
+            space_is_free = all(
+                (mouse_tile_x, mouse_tile_y) != (turret.tile_x, turret.tile_y)
+                for turret in turret_group
+            )
 
-    new_turret = Turret(turret_sprite_sheets, mouse_tile_x, mouse_tile_y)
-    turret_group.add(new_turret)
-    world_map.money -= BUY_COST
+            if space_is_free and world_map.money >= BUY_COST:
+                new_turret = Turret(turret_sprite_sheets, mouse_tile_x, mouse_tile_y, shot_fx)
+                turret_group.add(new_turret)
+                world_map.money -= BUY_COST  # Deduct only if placed
+                print(f"Turret placed at ({mouse_tile_x}, {mouse_tile_y})")
+            else:
+                print("Turret placement failed: Not enough money or space occupied.")
 
 
 def select_turret(mouse_pos):
@@ -328,6 +333,8 @@ def game_loop():
 
             # Draw buttons
             # Button for placing towers
+            draw_text(str(BUY_COST), FONT, (255, 255, 255), map_width + 240, 127)
+            screen.blit(coin_image, (map_width + 200, 130))
             if turret_button.draw(screen):
                 placing_turrets = True
             # if placing turrets then show the cancel button as well
@@ -335,7 +342,7 @@ def game_loop():
                 # show cursor turret
                 cursor_pos = pygame.mouse.get_pos()
 
-                # Use turret_1.png for the cursor preview
+                # Use turret_1_sheet for the cursor preview
                 turret_1_sheet = turret_sprite_sheets[0]
 
                 # Extract only the first frame (assuming 6 frames in a row)
@@ -356,6 +363,8 @@ def game_loop():
             if selected_turret:
                 # If a turret can be upgraded then show the upgrade button
                 if selected_turret.upgrade_level < TURRET_LEVELS:
+                    draw_text(str(UPGRADE_COST), FONT, (255, 255, 255), map_width + 290, 187)
+                    screen.blit(coin_image, (map_width + 250, 187))
                     if upgrade_button.draw(screen):
                         if world_map.money >= UPGRADE_COST:
                             selected_turret.upgrade()
