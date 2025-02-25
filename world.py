@@ -3,7 +3,7 @@ import random
 from enemy_data import ENEMY_SPAWN_DATA
 
 HEALTH = 100
-MONEY = 1000
+MONEY = 1600
 
 
 class World():
